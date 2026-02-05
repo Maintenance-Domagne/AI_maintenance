@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Maintenance HTML</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        width: 90%;
+        max-width: 600px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: none;
+        margin-bottom: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .response {
+        margin-top: 20px;
+        padding: 15px;
+        border-left: 5px solid #2196F3;
+        background: #e7f3fe;
+        border-radius: 6px;
+        display: none;
+    }
+
+    .response p {
+        margin: 0;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AI Maintenance HTML</h1>
+    <textarea id="problemInput" rows="4" placeholder="Décris ton problème ici..."></textarea>
+    <button onclick="solveProblem()">Obtenir une solution</button>
+
+    <div id="solution" class="response">
+        <p id="solutionText"></p>
+    </div>
+</div>
+
+<script>
+// Base de connaissances simple
+const knowledgeBase = [
+    {
+        keywords: ["bouton ne fonctionne pas", "onclick", "click"],
+        solution: "Vérifie que tu as bien un événement JavaScript lié au bouton, par exemple avec addEventListener('click', ...)."
+    },
+    {
+        keywords: ["image ne s'affiche pas", "img", "src"],
+        solution: "Assure-toi que le chemin de l'image est correct et que le fichier existe. Vérifie aussi l'extension (jpg, png, etc.)."
+    },
+    {
+        keywords: ["texte centré", "centrer texte", "text-align"],
+        solution: "Tu peux centrer ton texte avec CSS : 'text-align: center;' sur le conteneur."
+    },
+    {
+        keywords: ["div ne s'affiche pas", "bloc invisible", "display none"],
+        solution: "Vérifie que le style CSS n'utilise pas 'display: none;' ou que le conteneur n'est pas caché par un parent."
+    },
+    {
+        keywords: ["erreur html", "balise", "fermer balise", "html"],
+        solution: "Assure-toi que toutes tes balises sont correctement ouvertes et fermées. Tu peux utiliser un validateur HTML pour vérifier ton code."
+    },
+    {
+        keywords: ["css ne fonctionne pas", "style", "classe"],
+        solution: "Vérifie que ton fichier CSS est bien lié dans le HTML et que les classes ou IDs correspondent."
+    }
+];
+
+// Fonction qui cherche la solution
+function solveProblem() {
+    const userInput = document.getElementById("problemInput").value.toLowerCase();
+    let solution = "Désolé, je n'ai pas trouvé de solution pour ce problème. Essaie d'être plus précis.";
+
+    for (const item of knowledgeBase) {
+        for (const keyword of item.keywords) {
+            if (userInput.includes(keyword)) {
+                solution = item.solution;
+                break;
+            }
+        }
+    }
+
+    const solutionDiv = document.getElementById("solution");
+    const solutionText = document.getElementById("solutionText");
+    solutionText.textContent = solution;
+    solutionDiv.style.display = "block";
+}
+</script>
+
+</body>
+</html>
