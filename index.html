@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Maintenance Domagné</title>
+<title>AI Maintenance Pro</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -31,7 +31,7 @@
         color: #333;
     }
 
-    select, textarea, input {
+    select, textarea {
         width: 100%;
         padding: 10px;
         border-radius: 6px;
@@ -40,9 +40,7 @@
         box-sizing: border-box;
     }
 
-    textarea {
-        resize: none;
-    }
+    textarea { resize: none; }
 
     button {
         width: 100%;
@@ -55,9 +53,7 @@
         cursor: pointer;
     }
 
-    button:hover {
-        background-color: #45a049;
-    }
+    button:hover { background-color: #45a049; }
 
     .response {
         margin-top: 20px;
@@ -68,17 +64,10 @@
         display: none;
     }
 
-    .response ul {
-        padding-left: 20px;
-    }
+    .response ul { padding-left: 20px; }
+    .response li { margin-bottom: 5px; }
 
-    .response li {
-        margin-bottom: 5px;
-    }
-
-    .input-wrapper {
-        position: relative;
-    }
+    .input-wrapper { position: relative; }
 
     .suggestions {
         border: 1px solid #ccc;
@@ -92,14 +81,8 @@
         display: none;
     }
 
-    .suggestions div {
-        padding: 8px;
-        cursor: pointer;
-    }
-
-    .suggestions div:hover {
-        background: #f0f0f0;
-    }
+    .suggestions div { padding: 8px; cursor: pointer; }
+    .suggestions div:hover { background: #f0f0f0; }
 
     .history {
         margin-top: 25px;
@@ -109,27 +92,12 @@
         border-radius: 6px;
     }
 
-    .history h3 {
-        margin-top: 0;
-    }
+    .history h3 { margin-top: 0; }
 
-    .solution-category {
-        font-weight: bold;
-        margin-top: 10px;
-    }
-
-    .solution-item.high-priority {
-        color: green;
-    }
-
-    .solution-item.medium-priority {
-        color: orange;
-    }
-
-    .solution-item.low-priority {
-        color: red;
-    }
-
+    .solution-category { font-weight: bold; margin-top: 10px; }
+    .solution-item.high-priority { color: green; }
+    .solution-item.medium-priority { color: orange; }
+    .solution-item.low-priority { color: red; }
 </style>
 </head>
 <body>
@@ -165,109 +133,56 @@
 </div>
 
 <script>
-// Base de connaissances par machine, avec catégories
-const knowledgeBase = {
-    imprimante: [
-        {
-            keywords: ["papier bloqué", "bourrage", "coincé"],
-            category: "Matériel",
-            solutions: [
-                "Ouvrez le bac et retirez le papier coincé.",
-                "Vérifiez que le papier est correctement chargé.",
-                "Nettoyez les rouleaux si nécessaire."
-            ]
-        },
-        {
-            keywords: ["impression floue", "bavure", "qualité"],
-            category: "Logiciel",
-            solutions: [
-                "Nettoyez les têtes d'impression.",
-                "Vérifiez la qualité du papier.",
-                "Assurez-vous que l'imprimante est configurée sur la bonne résolution."
-            ]
-        }
-    ],
-    pc: [
-        {
-            keywords: ["bouton ne fonctionne pas", "power", "click"],
-            category: "Matériel",
-            solutions: [
-                "Vérifiez le câble du bouton d'alimentation.",
-                "Testez avec un autre périphérique d'entrée.",
-                "Redémarrez le PC et testez à nouveau."
-            ]
-        },
-        {
-            keywords: ["écran noir", "black screen", "no display"],
-            category: "Matériel",
-            solutions: [
-                "Vérifiez que le moniteur est bien connecté.",
-                "Testez avec un autre câble ou écran.",
-                "Redémarrez le PC en mode sans échec."
-            ]
-        }
-    ],
-    serveur: [
-        {
-            keywords: ["connexion lente", "slow", "lag"],
-            category: "Réseau",
-            solutions: [
-                "Vérifiez la charge du serveur.",
-                "Redémarrez les services réseau.",
-                "Contrôlez la bande passante et les logs du serveur."
-            ]
-        },
-        {
-            keywords: ["erreur 500", "internal server error", "http 500"],
-            category: "Logiciel",
-            solutions: [
-                "Vérifiez les logs du serveur pour identifier l'erreur.",
-                "Assurez-vous que les fichiers de configuration sont corrects.",
-                "Redémarrez le serveur si nécessaire."
-            ]
-        }
-    ]
-};
-
-// Suggestions dynamiques
-const suggestionKeywords = [
-    "papier bloqué", "impression floue", "bouton ne fonctionne pas",
-    "écran noir", "connexion lente", "erreur 500", "bavure",
-    "coincé", "power", "click", "slow", "lag"
+// Base JSON locale pour tester l'AI (peut être remplacée par SQL Server via API)
+let knowledgeBase = [
+    {
+        "id":1,"machine":"imprimante","category":"Matériel",
+        "description":"Le papier est coincé dans le bac ou le chemin d'impression",
+        "keywords":["papier bloqué","bourrage","coincé"],
+        "solutions":["Ouvrez le bac et retirez le papier coincé.","Vérifiez que le papier est correctement chargé.","Nettoyez les rouleaux si nécessaire."],
+        "priority":3
+    },
+    {
+        "id":2,"machine":"pc","category":"Matériel",
+        "description":"Le PC démarre mais l'écran reste noir",
+        "keywords":["écran noir","no display","black screen"],
+        "solutions":["Vérifiez que le moniteur est bien connecté.","Testez avec un autre câble ou écran.","Redémarrez le PC en mode sans échec."],
+        "priority":3
+    },
+    {
+        "id":3,"machine":"serveur","category":"Logiciel",
+        "description":"Le serveur renvoie une erreur interne 500",
+        "keywords":["erreur 500","internal server error","http 500"],
+        "solutions":["Vérifiez les logs du serveur pour identifier l'erreur.","Assurez-vous que les fichiers de configuration sont corrects.","Redémarrez le serveur si nécessaire."],
+        "priority":3
+    }
 ];
 
+const suggestionKeywords = ["papier bloqué","impression floue","bouton ne fonctionne pas","écran noir","connexion lente","erreur 500","bavure","coincé","power","click","slow","lag"];
 const problemInput = document.getElementById("problemInput");
 const suggestionsDiv = document.getElementById("suggestions");
+let history = [];
 
+// Suggestions dynamiques
 problemInput.addEventListener("input", function() {
     const text = problemInput.value.toLowerCase();
     suggestionsDiv.innerHTML = "";
-    if (!text) {
-        suggestionsDiv.style.display = "none";
-        return;
-    }
+    if(!text){ suggestionsDiv.style.display="none"; return; }
 
-    const matches = suggestionKeywords.filter(k => k.includes(text));
-    if (matches.length > 0) {
-        matches.forEach(m => {
+    const matches = suggestionKeywords.filter(k=>k.includes(text));
+    if(matches.length>0){
+        matches.forEach(m=>{
             const div = document.createElement("div");
             div.textContent = m;
-            div.addEventListener("click", () => {
-                problemInput.value = m;
-                suggestionsDiv.style.display = "none";
-            });
+            div.addEventListener("click",()=>{ problemInput.value=m; suggestionsDiv.style.display="none"; });
             suggestionsDiv.appendChild(div);
         });
-        suggestionsDiv.style.display = "block";
-    } else {
-        suggestionsDiv.style.display = "none";
-    }
+        suggestionsDiv.style.display="block";
+    }else suggestionsDiv.style.display="none";
 });
 
-// Historique
-let history = [];
-
-function getSolutions() {
+// Fonction pour détecter les mots-clés et afficher solutions
+function getSolutions(){
     const machine = document.getElementById("machineSelect").value;
     const problemText = problemInput.value.toLowerCase();
     const solutionDiv = document.getElementById("solution");
@@ -275,68 +190,47 @@ function getSolutions() {
     const historyDiv = document.getElementById("historyDiv");
     const historyList = document.getElementById("historyList");
 
-    solutionList.innerHTML = "";
+    solutionList.innerHTML="";
 
-    if (!machine) {
-        solutionList.innerHTML = "<li>Veuillez sélectionner une machine.</li>";
-        solutionDiv.style.display = "block";
-        return;
-    }
+    if(!machine){ solutionList.innerHTML="<li>Veuillez sélectionner une machine.</li>"; solutionDiv.style.display="block"; return; }
+    if(!problemText){ solutionList.innerHTML="<li>Veuillez décrire votre problème.</li>"; solutionDiv.style.display="block"; return; }
 
-    if (!problemText) {
-        solutionList.innerHTML = "<li>Veuillez décrire votre problème.</li>";
-        solutionDiv.style.display = "block";
-        return;
-    }
-
-    const knowledge = knowledgeBase[machine];
     const matchedSolutions = [];
 
-    // Détection multiple de mots-clés avec score
-    knowledge.forEach(item => {
-        let matchCount = 0;
-        item.keywords.forEach(keyword => {
-            if (problemText.includes(keyword.toLowerCase())) matchCount++;
+    knowledgeBase.filter(item=>item.machine===machine)
+        .forEach(item=>{
+            let matchCount = item.keywords.filter(kw=>problemText.includes(kw.toLowerCase())).length;
+            if(matchCount>0) matchedSolutions.push({solutions:item.solutions, category:item.category, score:matchCount});
         });
-        if (matchCount > 0) {
-            matchedSolutions.push({ solutions: item.solutions, category: item.category, score: matchCount });
-        }
-    });
 
-    if (matchedSolutions.length > 0) {
-        // Tri par score
-        matchedSolutions.sort((a, b) => b.score - a.score);
-
-        matchedSolutions.forEach(item => {
-            const categoryLi = document.createElement("li");
-            categoryLi.textContent = item.category;
-            categoryLi.className = "solution-category";
+    if(matchedSolutions.length>0){
+        matchedSolutions.sort((a,b)=>b.score-a.score);
+        matchedSolutions.forEach(item=>{
+            const categoryLi=document.createElement("li");
+            categoryLi.textContent=item.category;
+            categoryLi.className="solution-category";
             solutionList.appendChild(categoryLi);
 
-            item.solutions.forEach(sol => {
-                const li = document.createElement("li");
-                li.textContent = sol;
-                if (item.score >= 2) li.className = "solution-item high-priority";
-                else if (item.score === 1) li.className = "solution-item medium-priority";
-                else li.className = "solution-item low-priority";
+            item.solutions.forEach(sol=>{
+                const li=document.createElement("li");
+                li.textContent=sol;
+                li.className = item.score>=2 ? "solution-item high-priority" : "solution-item medium-priority";
                 solutionList.appendChild(li);
             });
         });
-    } else {
-        solutionList.innerHTML = "<li>Aucune solution trouvée. Essayez d'utiliser des mots-clés précis.</li>";
-    }
+    }else solutionList.innerHTML="<li>Aucune solution trouvée. Essayez d'utiliser des mots-clés précis.</li>";
 
-    solutionDiv.style.display = "block";
+    solutionDiv.style.display="block";
 
-    // Ajouter au historique
-    history.unshift({ machine: machine, problem: problemInput.value });
-    historyList.innerHTML = "";
-    history.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = `[${item.machine}] ${item.problem}`;
+    // Historique
+    history.unshift({machine:machine, problem:problemInput.value});
+    historyList.innerHTML="";
+    history.forEach(item=>{
+        const li=document.createElement("li");
+        li.textContent=`[${item.machine}] ${item.problem}`;
         historyList.appendChild(li);
     });
-    historyDiv.style.display = "block";
+    historyDiv.style.display="block";
 }
 </script>
 
