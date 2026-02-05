@@ -21,7 +21,7 @@ try {
     exit;
 }
 
-// Récupération des paramètres
+// Récupération des paramètres GET
 $machine = $_GET['machine'] ?? '';
 $problem = $_GET['problem'] ?? '';
 
@@ -62,3 +62,4 @@ usort($matched, function($a, $b){ return $b['score'] - $a['score']; });
 
 echo json_encode($matched);
 ?>
+

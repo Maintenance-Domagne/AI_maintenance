@@ -3,107 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Maintenance Domagné</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f5f5f5;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh;
-        padding: 20px;
-        margin: 0;
-    }
-
-    .container {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        width: 100%;
-        max-width: 800px;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    select, textarea {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin-bottom: 15px;
-        box-sizing: border-box;
-    }
-
-    textarea { resize: none; }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        border-radius: 6px;
-        border: none;
-        background-color: #4CAF50;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-    button:hover { background-color: #45a049; }
-
-    .response {
-        margin-top: 20px;
-        padding: 15px;
-        border-left: 5px solid #2196F3;
-        background: #e7f3fe;
-        border-radius: 6px;
-        display: none;
-    }
-
-    .response ul { padding-left: 20px; }
-    .response li { margin-bottom: 5px; }
-
-    .input-wrapper { position: relative; }
-
-    .suggestions {
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        background: white;
-        max-height: 120px;
-        overflow-y: auto;
-        position: absolute;
-        width: calc(100% - 22px);
-        z-index: 10;
-        display: none;
-    }
-
-    .suggestions div { padding: 8px; cursor: pointer; }
-    .suggestions div:hover { background: #f0f0f0; }
-
-    .history {
-        margin-top: 25px;
-        background: #fff8e1;
-        border-left: 5px solid #ff9800;
-        padding: 15px;
-        border-radius: 6px;
-    }
-
-    .history h3 { margin-top: 0; }
-
-    .solution-category { font-weight: bold; margin-top: 10px; }
-    .solution-item.high-priority { color: green; }
-    .solution-item.medium-priority { color: orange; }
-    .solution-item.low-priority { color: red; }
-</style>
+<title>AI Maintenance Pro</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="container">
-    <h1>IA Maintenance Domagné</h1>
+    <h1>AI Maintenance Pro</h1>
 
     <label for="machineSelect">Sélectionnez la machine :</label>
     <select id="machineSelect">
@@ -115,7 +20,7 @@
 
     <label for="problemInput">Décrivez votre problème :</label>
     <div class="input-wrapper">
-        <textarea id="problemInput" rows="4" placeholder="Ex: Mon écran reste noir après le démarrage..."></textarea>
+        <textarea id="problemInput" rows="4" placeholder="Ex: Mon écran reste noir..."></textarea>
         <div id="suggestions" class="suggestions"></div>
     </div>
 
@@ -132,158 +37,7 @@
     </div>
 </div>
 
-<script>
-    function getSolutions() {
-    const machine = document.getElementById("machineSelect").value;
-    const problemText = document.getElementById("problemInput").value.trim();
-    const solutionDiv = document.getElementById("solution");
-    const solutionList = document.getElementById("solutionList");
-    const historyDiv = document.getElementById("historyDiv");
-    const historyList = document.getElementById("historyList");
-
-    solutionList.innerHTML = "";
-
-    if (!machine) { solutionList.innerHTML = "<li>Veuillez sélectionner une machine.</li>"; solutionDiv.style.display="block"; return; }
-    if (!problemText) { solutionList.innerHTML = "<li>Veuillez décrire votre problème.</li>"; solutionDiv.style.display="block"; return; }
-
-    fetch(`api/get_solutions.php?machine=${encodeURIComponent(machine)}&problem=${encodeURIComponent(problemText)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.length === 0) {
-                solutionList.innerHTML = "<li>Aucune solution trouvée.</li>";
-            } else {
-                data.forEach(item => {
-                    const categoryLi = document.createElement("li");
-                    categoryLi.textContent = item.category;
-                    categoryLi.className = "solution-category";
-                    solutionList.appendChild(categoryLi);
-
-                    item.solutions.forEach(sol => {
-                        const li = document.createElement("li");
-                        li.textContent = sol;
-                        li.className = item.score >= 2 ? "solution-item high-priority" : "solution-item medium-priority";
-                        solutionList.appendChild(li);
-                    });
-                });
-            }
-            solutionDiv.style.display = "block";
-
-            // Historique
-            history.unshift({machine: machine, problem: problemText});
-            historyList.innerHTML = "";
-            history.forEach(item => {
-                const li = document.createElement("li");
-                li.textContent = `[${item.machine}] ${item.problem}`;
-                historyList.appendChild(li);
-            });
-            historyDiv.style.display = "block";
-        })
-        .catch(err => {
-            solutionList.innerHTML = "<li>Erreur serveur : " + err + "</li>";
-            solutionDiv.style.display = "block";
-        });
-}
-
-// Base JSON locale pour tester l'AI (peut être remplacée par SQL Server via API)
-let knowledgeBase = [
-    {
-        "id":1,"machine":"imprimante","category":"Matériel",
-        "description":"Le papier est coincé dans le bac ou le chemin d'impression",
-        "keywords":["papier bloqué","bourrage","coincé"],
-        "solutions":["Ouvrez le bac et retirez le papier coincé.","Vérifiez que le papier est correctement chargé.","Nettoyez les rouleaux si nécessaire."],
-        "priority":3
-    },
-    {
-        "id":2,"machine":"pc","category":"Matériel",
-        "description":"Le PC démarre mais l'écran reste noir",
-        "keywords":["écran noir","no display","black screen"],
-        "solutions":["Vérifiez que le moniteur est bien connecté.","Testez avec un autre câble ou écran.","Redémarrez le PC en mode sans échec."],
-        "priority":3
-    },
-    {
-        "id":3,"machine":"serveur","category":"Logiciel",
-        "description":"Le serveur renvoie une erreur interne 500",
-        "keywords":["erreur 500","internal server error","http 500"],
-        "solutions":["Vérifiez les logs du serveur pour identifier l'erreur.","Assurez-vous que les fichiers de configuration sont corrects.","Redémarrez le serveur si nécessaire."],
-        "priority":3
-    }
-];
-
-const suggestionKeywords = ["papier bloqué","impression floue","bouton ne fonctionne pas","écran noir","connexion lente","erreur 500","bavure","coincé","power","click","slow","lag"];
-const problemInput = document.getElementById("problemInput");
-const suggestionsDiv = document.getElementById("suggestions");
-let history = [];
-
-// Suggestions dynamiques
-problemInput.addEventListener("input", function() {
-    const text = problemInput.value.toLowerCase();
-    suggestionsDiv.innerHTML = "";
-    if(!text){ suggestionsDiv.style.display="none"; return; }
-
-    const matches = suggestionKeywords.filter(k=>k.includes(text));
-    if(matches.length>0){
-        matches.forEach(m=>{
-            const div = document.createElement("div");
-            div.textContent = m;
-            div.addEventListener("click",()=>{ problemInput.value=m; suggestionsDiv.style.display="none"; });
-            suggestionsDiv.appendChild(div);
-        });
-        suggestionsDiv.style.display="block";
-    }else suggestionsDiv.style.display="none";
-});
-
-// Fonction pour détecter les mots-clés et afficher solutions
-function getSolutions(){
-    const machine = document.getElementById("machineSelect").value;
-    const problemText = problemInput.value.toLowerCase();
-    const solutionDiv = document.getElementById("solution");
-    const solutionList = document.getElementById("solutionList");
-    const historyDiv = document.getElementById("historyDiv");
-    const historyList = document.getElementById("historyList");
-
-    solutionList.innerHTML="";
-
-    if(!machine){ solutionList.innerHTML="<li>Veuillez sélectionner une machine.</li>"; solutionDiv.style.display="block"; return; }
-    if(!problemText){ solutionList.innerHTML="<li>Veuillez décrire votre problème.</li>"; solutionDiv.style.display="block"; return; }
-
-    const matchedSolutions = [];
-
-    knowledgeBase.filter(item=>item.machine===machine)
-        .forEach(item=>{
-            let matchCount = item.keywords.filter(kw=>problemText.includes(kw.toLowerCase())).length;
-            if(matchCount>0) matchedSolutions.push({solutions:item.solutions, category:item.category, score:matchCount});
-        });
-
-    if(matchedSolutions.length>0){
-        matchedSolutions.sort((a,b)=>b.score-a.score);
-        matchedSolutions.forEach(item=>{
-            const categoryLi=document.createElement("li");
-            categoryLi.textContent=item.category;
-            categoryLi.className="solution-category";
-            solutionList.appendChild(categoryLi);
-
-            item.solutions.forEach(sol=>{
-                const li=document.createElement("li");
-                li.textContent=sol;
-                li.className = item.score>=2 ? "solution-item high-priority" : "solution-item medium-priority";
-                solutionList.appendChild(li);
-            });
-        });
-    }else solutionList.innerHTML="<li>Aucune solution trouvée. Essayez d'utiliser des mots-clés précis.</li>";
-
-    solutionDiv.style.display="block";
-
-    // Historique
-    history.unshift({machine:machine, problem:problemInput.value});
-    historyList.innerHTML="";
-    history.forEach(item=>{
-        const li=document.createElement("li");
-        li.textContent=`[${item.machine}] ${item.problem}`;
-        historyList.appendChild(li);
-    });
-    historyDiv.style.display="block";
-}
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
+
