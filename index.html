@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Maintenance HTML</title>
+<title>AI Maintenance Pro</title>
 <style>
     body {
         font-family: Arial, sans-serif;
         background: #f5f5f5;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 20px;
         margin: 0;
     }
 
@@ -20,8 +21,8 @@
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        width: 90%;
-        max-width: 600px;
+        width: 100%;
+        max-width: 800px;
     }
 
     h1 {
@@ -30,13 +31,17 @@
         color: #333;
     }
 
-    textarea {
+    select, textarea, input {
         width: 100%;
         padding: 10px;
         border-radius: 6px;
         border: 1px solid #ccc;
-        resize: none;
         margin-bottom: 15px;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        resize: none;
     }
 
     button {
@@ -63,70 +68,275 @@
         display: none;
     }
 
-    .response p {
-        margin: 0;
+    .response ul {
+        padding-left: 20px;
     }
+
+    .response li {
+        margin-bottom: 5px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .suggestions {
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: white;
+        max-height: 120px;
+        overflow-y: auto;
+        position: absolute;
+        width: calc(100% - 22px);
+        z-index: 10;
+        display: none;
+    }
+
+    .suggestions div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestions div:hover {
+        background: #f0f0f0;
+    }
+
+    .history {
+        margin-top: 25px;
+        background: #fff8e1;
+        border-left: 5px solid #ff9800;
+        padding: 15px;
+        border-radius: 6px;
+    }
+
+    .history h3 {
+        margin-top: 0;
+    }
+
+    .solution-category {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .solution-item.high-priority {
+        color: green;
+    }
+
+    .solution-item.medium-priority {
+        color: orange;
+    }
+
+    .solution-item.low-priority {
+        color: red;
+    }
+
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>AI Maintenance HTML</h1>
-    <textarea id="problemInput" rows="4" placeholder="Décris ton problème ici..."></textarea>
-    <button onclick="solveProblem()">Obtenir une solution</button>
+    <h1>AI Maintenance Pro</h1>
+
+    <label for="machineSelect">Sélectionnez la machine :</label>
+    <select id="machineSelect">
+        <option value="">-- Choisir une machine --</option>
+        <option value="imprimante">Imprimante</option>
+        <option value="pc">PC</option>
+        <option value="serveur">Serveur</option>
+    </select>
+
+    <label for="problemInput">Décrivez votre problème :</label>
+    <div class="input-wrapper">
+        <textarea id="problemInput" rows="4" placeholder="Ex: Mon écran reste noir après le démarrage..."></textarea>
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <button onclick="getSolutions()">Obtenir les solutions</button>
 
     <div id="solution" class="response">
-        <p id="solutionText"></p>
+        <p>Solutions possibles :</p>
+        <ul id="solutionList"></ul>
+    </div>
+
+    <div class="history" id="historyDiv" style="display:none;">
+        <h3>Historique des problèmes :</h3>
+        <ul id="historyList"></ul>
     </div>
 </div>
 
 <script>
-// Base de connaissances simple
-const knowledgeBase = [
-    {
-        keywords: ["bouton ne fonctionne pas", "onclick", "click"],
-        solution: "Vérifie que tu as bien un événement JavaScript lié au bouton, par exemple avec addEventListener('click', ...)."
-    },
-    {
-        keywords: ["image ne s'affiche pas", "img", "src"],
-        solution: "Assure-toi que le chemin de l'image est correct et que le fichier existe. Vérifie aussi l'extension (jpg, png, etc.)."
-    },
-    {
-        keywords: ["texte centré", "centrer texte", "text-align"],
-        solution: "Tu peux centrer ton texte avec CSS : 'text-align: center;' sur le conteneur."
-    },
-    {
-        keywords: ["div ne s'affiche pas", "bloc invisible", "display none"],
-        solution: "Vérifie que le style CSS n'utilise pas 'display: none;' ou que le conteneur n'est pas caché par un parent."
-    },
-    {
-        keywords: ["erreur html", "balise", "fermer balise", "html"],
-        solution: "Assure-toi que toutes tes balises sont correctement ouvertes et fermées. Tu peux utiliser un validateur HTML pour vérifier ton code."
-    },
-    {
-        keywords: ["css ne fonctionne pas", "style", "classe"],
-        solution: "Vérifie que ton fichier CSS est bien lié dans le HTML et que les classes ou IDs correspondent."
-    }
+// Base de connaissances par machine, avec catégories
+const knowledgeBase = {
+    imprimante: [
+        {
+            keywords: ["papier bloqué", "bourrage", "coincé"],
+            category: "Matériel",
+            solutions: [
+                "Ouvrez le bac et retirez le papier coincé.",
+                "Vérifiez que le papier est correctement chargé.",
+                "Nettoyez les rouleaux si nécessaire."
+            ]
+        },
+        {
+            keywords: ["impression floue", "bavure", "qualité"],
+            category: "Logiciel",
+            solutions: [
+                "Nettoyez les têtes d'impression.",
+                "Vérifiez la qualité du papier.",
+                "Assurez-vous que l'imprimante est configurée sur la bonne résolution."
+            ]
+        }
+    ],
+    pc: [
+        {
+            keywords: ["bouton ne fonctionne pas", "power", "click"],
+            category: "Matériel",
+            solutions: [
+                "Vérifiez le câble du bouton d'alimentation.",
+                "Testez avec un autre périphérique d'entrée.",
+                "Redémarrez le PC et testez à nouveau."
+            ]
+        },
+        {
+            keywords: ["écran noir", "black screen", "no display"],
+            category: "Matériel",
+            solutions: [
+                "Vérifiez que le moniteur est bien connecté.",
+                "Testez avec un autre câble ou écran.",
+                "Redémarrez le PC en mode sans échec."
+            ]
+        }
+    ],
+    serveur: [
+        {
+            keywords: ["connexion lente", "slow", "lag"],
+            category: "Réseau",
+            solutions: [
+                "Vérifiez la charge du serveur.",
+                "Redémarrez les services réseau.",
+                "Contrôlez la bande passante et les logs du serveur."
+            ]
+        },
+        {
+            keywords: ["erreur 500", "internal server error", "http 500"],
+            category: "Logiciel",
+            solutions: [
+                "Vérifiez les logs du serveur pour identifier l'erreur.",
+                "Assurez-vous que les fichiers de configuration sont corrects.",
+                "Redémarrez le serveur si nécessaire."
+            ]
+        }
+    ]
+};
+
+// Suggestions dynamiques
+const suggestionKeywords = [
+    "papier bloqué", "impression floue", "bouton ne fonctionne pas",
+    "écran noir", "connexion lente", "erreur 500", "bavure",
+    "coincé", "power", "click", "slow", "lag"
 ];
 
-// Fonction qui cherche la solution
-function solveProblem() {
-    const userInput = document.getElementById("problemInput").value.toLowerCase();
-    let solution = "Désolé, je n'ai pas trouvé de solution pour ce problème. Essaie d'être plus précis.";
+const problemInput = document.getElementById("problemInput");
+const suggestionsDiv = document.getElementById("suggestions");
 
-    for (const item of knowledgeBase) {
-        for (const keyword of item.keywords) {
-            if (userInput.includes(keyword)) {
-                solution = item.solution;
-                break;
-            }
-        }
+problemInput.addEventListener("input", function() {
+    const text = problemInput.value.toLowerCase();
+    suggestionsDiv.innerHTML = "";
+    if (!text) {
+        suggestionsDiv.style.display = "none";
+        return;
     }
 
+    const matches = suggestionKeywords.filter(k => k.includes(text));
+    if (matches.length > 0) {
+        matches.forEach(m => {
+            const div = document.createElement("div");
+            div.textContent = m;
+            div.addEventListener("click", () => {
+                problemInput.value = m;
+                suggestionsDiv.style.display = "none";
+            });
+            suggestionsDiv.appendChild(div);
+        });
+        suggestionsDiv.style.display = "block";
+    } else {
+        suggestionsDiv.style.display = "none";
+    }
+});
+
+// Historique
+let history = [];
+
+function getSolutions() {
+    const machine = document.getElementById("machineSelect").value;
+    const problemText = problemInput.value.toLowerCase();
     const solutionDiv = document.getElementById("solution");
-    const solutionText = document.getElementById("solutionText");
-    solutionText.textContent = solution;
+    const solutionList = document.getElementById("solutionList");
+    const historyDiv = document.getElementById("historyDiv");
+    const historyList = document.getElementById("historyList");
+
+    solutionList.innerHTML = "";
+
+    if (!machine) {
+        solutionList.innerHTML = "<li>Veuillez sélectionner une machine.</li>";
+        solutionDiv.style.display = "block";
+        return;
+    }
+
+    if (!problemText) {
+        solutionList.innerHTML = "<li>Veuillez décrire votre problème.</li>";
+        solutionDiv.style.display = "block";
+        return;
+    }
+
+    const knowledge = knowledgeBase[machine];
+    const matchedSolutions = [];
+
+    // Détection multiple de mots-clés avec score
+    knowledge.forEach(item => {
+        let matchCount = 0;
+        item.keywords.forEach(keyword => {
+            if (problemText.includes(keyword.toLowerCase())) matchCount++;
+        });
+        if (matchCount > 0) {
+            matchedSolutions.push({ solutions: item.solutions, category: item.category, score: matchCount });
+        }
+    });
+
+    if (matchedSolutions.length > 0) {
+        // Tri par score
+        matchedSolutions.sort((a, b) => b.score - a.score);
+
+        matchedSolutions.forEach(item => {
+            const categoryLi = document.createElement("li");
+            categoryLi.textContent = item.category;
+            categoryLi.className = "solution-category";
+            solutionList.appendChild(categoryLi);
+
+            item.solutions.forEach(sol => {
+                const li = document.createElement("li");
+                li.textContent = sol;
+                if (item.score >= 2) li.className = "solution-item high-priority";
+                else if (item.score === 1) li.className = "solution-item medium-priority";
+                else li.className = "solution-item low-priority";
+                solutionList.appendChild(li);
+            });
+        });
+    } else {
+        solutionList.innerHTML = "<li>Aucune solution trouvée. Essayez d'utiliser des mots-clés précis.</li>";
+    }
+
     solutionDiv.style.display = "block";
+
+    // Ajouter au historique
+    history.unshift({ machine: machine, problem: problemInput.value });
+    historyList.innerHTML = "";
+    history.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `[${item.machine}] ${item.problem}`;
+        historyList.appendChild(li);
+    });
+    historyDiv.style.display = "block";
 }
 </script>
 
