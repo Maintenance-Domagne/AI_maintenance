@@ -1,2 +1,1 @@
-# AI_maintenance
-AI pour l'aide au dépannage
+Déposer ici les PDF, fiches SOS et exports GMAO.

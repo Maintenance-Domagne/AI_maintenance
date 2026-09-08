@@ -1,0 +1,6 @@
+streamlit
+langchain
+chromadb
+pandas
+gitpython
+ollama
