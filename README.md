@@ -1,1 +1,0 @@
-Déposer ici les PDF, fiches SOS et exports GMAO.
